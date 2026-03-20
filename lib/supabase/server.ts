@@ -1,19 +1,21 @@
 import { createServerClient } from "@supabase/ssr";
 import { cookies } from "next/headers";
 import type { Database } from "@/types/database";
-
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
-
-if (!supabaseUrl || !supabaseAnonKey) {
-  throw new Error("Missing NEXT_PUBLIC_SUPABASE_URL or NEXT_PUBLIC_SUPABASE_ANON_KEY");
-}
+import {
+  getSupabaseConfigErrorMessage,
+  getSupabasePublicEnv,
+} from "@/lib/supabase/config";
 
 export async function createSupabaseServerClient() {
+  const env = getSupabasePublicEnv();
+  if (!env) {
+    throw new Error(getSupabaseConfigErrorMessage());
+  }
+
   // Adapter to let Supabase read/write auth cookies in Next.js.
   const cookieStore = await cookies();
 
-  return createServerClient<Database>(supabaseUrl!, supabaseAnonKey!, {
+  return createServerClient<Database>(env.url, env.anonKey, {
     cookies: {
       get(name: string) {
         return cookieStore.get(name)?.value;
@@ -27,4 +29,3 @@ export async function createSupabaseServerClient() {
     },
   });
 }
-

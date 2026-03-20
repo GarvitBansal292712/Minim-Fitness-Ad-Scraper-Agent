@@ -1,8 +1,10 @@
 import ConceptsGridClient from "@/components/concepts/ConceptsGridClient";
+import SupabaseConfigNotice from "@/components/shared/SupabaseConfigNotice";
 import {
   getConceptsPageData,
   type ConceptsStatusFilter,
 } from "@/lib/queries/concepts";
+import { hasSupabaseEnv } from "@/lib/supabase/config";
 
 const validFilters: ConceptsStatusFilter[] = ["pending", "approved", "rejected"];
 
@@ -18,6 +20,10 @@ export default async function ConceptsPage({
 }: {
   searchParams?: Promise<Record<string, string | string[] | undefined>>;
 }) {
+  if (!hasSupabaseEnv()) {
+    return <SupabaseConfigNotice />;
+  }
+
   const sp = searchParams ? await searchParams : {};
   const statusFilter = normalizeStatusFilter(sp.status);
   const data = await getConceptsPageData({ statusFilter });
@@ -26,4 +32,3 @@ export default async function ConceptsPage({
     <ConceptsGridClient items={data.items} statusFilter={data.statusFilter} />
   );
 }
-

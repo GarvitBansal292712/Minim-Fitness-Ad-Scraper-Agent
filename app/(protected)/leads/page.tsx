@@ -1,8 +1,10 @@
 import LeadsTableClient from "@/components/leads/LeadsTableClient";
+import SupabaseConfigNotice from "@/components/shared/SupabaseConfigNotice";
 import {
   getLeadsPageData,
   type LeadsStatusFilter,
 } from "@/lib/queries/leads";
+import { hasSupabaseEnv } from "@/lib/supabase/config";
 
 const pageSize = 10;
 
@@ -26,6 +28,10 @@ export default async function LeadsPage({
 }: {
   searchParams?: Promise<Record<string, string | string[] | undefined>>;
 }) {
+  if (!hasSupabaseEnv()) {
+    return <SupabaseConfigNotice />;
+  }
+
   const sp = searchParams ? await searchParams : {};
 
   const statusFilter = normalizeStatusFilter(sp.status);
@@ -48,4 +54,3 @@ export default async function LeadsPage({
     />
   );
 }
-

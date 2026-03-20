@@ -1,4 +1,6 @@
+import SupabaseConfigNotice from "@/components/shared/SupabaseConfigNotice";
 import { getOutreachPageData } from "@/lib/queries/outreach";
+import { hasSupabaseEnv } from "@/lib/supabase/config";
 
 function formatSentAt(sentAt: string | null) {
   if (!sentAt) return "—";
@@ -41,6 +43,10 @@ function ReplyBadge({ replyReceived }: { replyReceived: boolean | null }) {
 }
 
 export default async function OutreachPage() {
+  if (!hasSupabaseEnv()) {
+    return <SupabaseConfigNotice />;
+  }
+
   const { items, totalSent, replies, bookedCalls } =
     await getOutreachPageData();
 
@@ -132,4 +138,3 @@ export default async function OutreachPage() {
     </div>
   );
 }
-

@@ -1,6 +1,10 @@
 "use client";
 
-import { supabase } from "@/lib/supabase/client";
+import { getSupabaseBrowserClient } from "@/lib/supabase/client";
+import {
+  getSupabaseConfigErrorMessage,
+  hasSupabaseEnv,
+} from "@/lib/supabase/config";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
@@ -10,6 +14,7 @@ function SkeletonLine({ className }: { className: string }) {
 
 export default function LoginPage() {
   const router = useRouter();
+  const isSupabaseConfigured = hasSupabaseEnv();
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -24,6 +29,13 @@ export default function LoginPage() {
     }
 
     setIsLoading(true);
+    const supabase = getSupabaseBrowserClient();
+    if (!supabase) {
+      setIsLoading(false);
+      setErrorMessage(getSupabaseConfigErrorMessage());
+      return;
+    }
+
     const { error } = await supabase.auth.signInWithPassword({
       email: email.trim(),
       password,
@@ -92,13 +104,17 @@ export default function LoginPage() {
                   <div className="text-sm text-black/70 bg-white/65 border border-white/75 rounded-[10px] px-3 py-2">
                     {errorMessage}
                   </div>
+                ) : !isSupabaseConfigured ? (
+                  <div className="text-sm text-black/70 bg-white/65 border border-white/75 rounded-[10px] px-3 py-2">
+                    {getSupabaseConfigErrorMessage()}
+                  </div>
                 ) : null}
 
                 <button
                   type="button"
                   onClick={onSignIn}
                   className="h-[44px] rounded-[10px] bg-gradient-to-r from-[#3B82F6] to-[#38BDF8] text-white font-medium shadow-[0_4px_14px_rgba(59,130,246,0.3)] hover:brightness-[1.02] disabled:opacity-60 disabled:cursor-not-allowed"
-                  disabled={!email.trim() || !password || isLoading}
+                  disabled={!email.trim() || !password || isLoading || !isSupabaseConfigured}
                 >
                   Sign in
                 </button>
@@ -110,4 +126,3 @@ export default function LoginPage() {
     </div>
   );
 }
-

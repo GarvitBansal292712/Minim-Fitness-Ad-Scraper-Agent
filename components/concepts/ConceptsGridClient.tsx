@@ -2,7 +2,8 @@
 
 import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
-import { supabase } from "@/lib/supabase/client";
+import { getSupabaseBrowserClient } from "@/lib/supabase/client";
+import { getSupabaseConfigErrorMessage } from "@/lib/supabase/config";
 import type {
   ConceptsListItem,
   ConceptsStatusFilter,
@@ -45,6 +46,15 @@ export default function ConceptsGridClient(props: {
 
   async function onApprove(conceptId: string, leadId: string) {
     setCardErrorById((prev) => ({ ...prev, [conceptId]: "" }));
+    const supabase = getSupabaseBrowserClient();
+    if (!supabase) {
+      setCardErrorById((prev) => ({
+        ...prev,
+        [conceptId]: getSupabaseConfigErrorMessage(),
+      }));
+      return;
+    }
+
     setLoading({ conceptId, action: "approve" });
 
     const payload = { status: "concept_ready" } as unknown as never;
@@ -85,6 +95,15 @@ export default function ConceptsGridClient(props: {
       setCardErrorById((prev) => ({
         ...prev,
         [conceptId]: "Add rejection notes before submitting.",
+      }));
+      return;
+    }
+
+    const supabase = getSupabaseBrowserClient();
+    if (!supabase) {
+      setCardErrorById((prev) => ({
+        ...prev,
+        [conceptId]: getSupabaseConfigErrorMessage(),
       }));
       return;
     }
@@ -314,4 +333,3 @@ export default function ConceptsGridClient(props: {
     </div>
   );
 }
-

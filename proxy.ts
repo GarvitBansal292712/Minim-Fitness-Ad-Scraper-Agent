@@ -5,11 +5,27 @@ import {
 } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 import type { Database } from "@/types/database";
+import { getSupabasePublicEnv } from "@/lib/supabase/config";
 
 const protectedRoutePrefixes = ["/dashboard", "/leads", "/concepts", "/outreach"];
 
-export async function middleware(req: NextRequest) {
+export async function proxy(req: NextRequest) {
   const res = NextResponse.next();
+  const { pathname } = req.nextUrl;
+  const isProtectedRoute = protectedRoutePrefixes.some((p) => pathname.startsWith(p));
+  const isLoginRoute = pathname === "/login";
+  const supabaseEnv = getSupabasePublicEnv();
+
+  if (!supabaseEnv) {
+    if (isProtectedRoute) {
+      const url = req.nextUrl.clone();
+      url.pathname = "/login";
+      url.searchParams.set("redirectedFrom", pathname);
+      return NextResponse.redirect(url);
+    }
+
+    return res;
+  }
 
   const cookieHeader = req.headers.get("cookie") ?? "";
   const initialCookies = parseCookieHeader(cookieHeader);
@@ -21,8 +37,8 @@ export async function middleware(req: NextRequest) {
   );
 
   const supabase = createServerClient<Database>(
-    process.env.NEXT_PUBLIC_SUPABASE_URL ?? "",
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ?? "",
+    supabaseEnv.url,
+    supabaseEnv.anonKey,
     {
       cookies: {
         getAll: async () => cookies,
@@ -50,10 +66,6 @@ export async function middleware(req: NextRequest) {
     data: { user },
   } = await supabase.auth.getUser();
 
-  const { pathname } = req.nextUrl;
-  const isProtectedRoute = protectedRoutePrefixes.some((p) => pathname.startsWith(p));
-  const isLoginRoute = pathname === "/login";
-
   if (isProtectedRoute && !user) {
     const url = req.nextUrl.clone();
     url.pathname = "/login";
@@ -79,4 +91,3 @@ export const config = {
     "/login",
   ],
 };
-

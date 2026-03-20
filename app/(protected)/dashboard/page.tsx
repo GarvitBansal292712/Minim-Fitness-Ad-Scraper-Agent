@@ -1,5 +1,7 @@
 import TriggerScanButton from "@/components/dashboard/TriggerScanButton";
+import SupabaseConfigNotice from "@/components/shared/SupabaseConfigNotice";
 import { getDashboardData } from "@/lib/queries/dashboard";
+import { hasSupabaseEnv } from "@/lib/supabase/config";
 import type { Database } from "@/types/database";
 
 type ScanRun = Database["public"]["Tables"]["scan_runs"]["Row"];
@@ -80,6 +82,10 @@ function ScanStatusBadge({ status }: { status: ScanRun["status"] }) {
 }
 
 export default async function DashboardPage() {
+  if (!hasSupabaseEnv()) {
+    return <SupabaseConfigNotice />;
+  }
+
   const { scanRuns, totalLeads, conceptsPending, emailsSent, replies } =
     await getDashboardData();
 
@@ -187,4 +193,3 @@ export default async function DashboardPage() {
     </div>
   );
 }
-

@@ -1,6 +1,6 @@
 "use client";
 
-import { supabase } from "@/lib/supabase/client";
+import { getSupabaseBrowserClient } from "@/lib/supabase/client";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
@@ -11,6 +11,12 @@ export default function LogoutButton() {
   async function onLogout() {
     if (isSigningOut) return;
     setIsSigningOut(true);
+
+    const supabase = getSupabaseBrowserClient();
+    if (!supabase) {
+      router.push("/login");
+      return;
+    }
 
     const { error } = await supabase.auth.signOut();
     if (error) {
@@ -37,4 +43,3 @@ export default function LogoutButton() {
     </button>
   );
 }
-
