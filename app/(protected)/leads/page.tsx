@@ -1,9 +1,6 @@
 import LeadsTableClient from "@/components/leads/LeadsTableClient";
 import SupabaseConfigNotice from "@/components/shared/SupabaseConfigNotice";
-import {
-  getLeadsPageData,
-  type LeadsStatusFilter,
-} from "@/lib/queries/leads";
+import type { LeadsStatusFilter } from "@/lib/queries/leads";
 import { hasSupabaseEnv } from "@/lib/supabase/config";
 
 const pageSize = 10;
@@ -39,6 +36,7 @@ export default async function LeadsPage({
   const page =
     typeof rawPage === "string" ? Math.max(1, Number.parseInt(rawPage, 10) || 1) : 1;
 
+  const { getLeadsPageData } = await import("@/lib/queries/leads");
   const data = await getLeadsPageData({
     statusFilter,
     page,

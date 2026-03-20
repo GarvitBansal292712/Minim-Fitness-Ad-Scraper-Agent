@@ -1,4 +1,3 @@
-import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { hasSupabaseEnv } from "@/lib/supabase/config";
 import Sidebar from "@/components/dashboard/Sidebar";
 import { redirect } from "next/navigation";
@@ -15,6 +14,7 @@ export default async function ProtectedLayout({
     );
   }
 
+  const { createSupabaseServerClient } = await import("@/lib/supabase/server");
   const supabase = await createSupabaseServerClient();
   const {
     data: { user },

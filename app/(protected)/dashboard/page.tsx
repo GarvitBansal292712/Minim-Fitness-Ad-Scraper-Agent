@@ -1,6 +1,5 @@
 import TriggerScanButton from "@/components/dashboard/TriggerScanButton";
 import SupabaseConfigNotice from "@/components/shared/SupabaseConfigNotice";
-import { getDashboardData } from "@/lib/queries/dashboard";
 import { hasSupabaseEnv } from "@/lib/supabase/config";
 import type { Database } from "@/types/database";
 
@@ -86,6 +85,7 @@ export default async function DashboardPage() {
     return <SupabaseConfigNotice />;
   }
 
+  const { getDashboardData } = await import("@/lib/queries/dashboard");
   const { scanRuns, totalLeads, conceptsPending, emailsSent, replies } =
     await getDashboardData();
 

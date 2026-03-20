@@ -1,5 +1,4 @@
 import SupabaseConfigNotice from "@/components/shared/SupabaseConfigNotice";
-import { getOutreachPageData } from "@/lib/queries/outreach";
 import { hasSupabaseEnv } from "@/lib/supabase/config";
 
 function formatSentAt(sentAt: string | null) {
@@ -47,6 +46,7 @@ export default async function OutreachPage() {
     return <SupabaseConfigNotice />;
   }
 
+  const { getOutreachPageData } = await import("@/lib/queries/outreach");
   const { items, totalSent, replies, bookedCalls } =
     await getOutreachPageData();
 
